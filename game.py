@@ -53,7 +53,9 @@ class Item(Base):
     evasion_inc = Column(Integer)
     player_id = Column(Integer, ForeignKey("players.id"))  # Foreign key relationship
 
-    def __init__(self, name, attack_inc=0, defense_inc=0, hp_inc=0, mp_inc=0, evasion_inc=0):
+    def __init__(
+        self, name, attack_inc=0, defense_inc=0, hp_inc=0, mp_inc=0, evasion_inc=0
+    ):
         self.name = name
         self.attack_inc = attack_inc
         self.defense_inc = defense_inc
@@ -180,16 +182,24 @@ def battle(player, quest):
             for i, item in enumerate(player.inventory, 1):
                 print(f"{i}. {item}")
             item_choice = int(input("Enter the number of the item you want to use: "))
-            chosen_item = player.inventory[item_choice - 1]
 
-            if chosen_item.name.lower() == "mana potion" or chosen_item.name.lower() == "health potion":
-                chosen_item.apply_to_player(player)
-                print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} HP!")
+            if 1 <= item_choice <= len(player.inventory):
+                chosen_item = player.inventory[item_choice - 1]
 
-            elif chosen_item.name.lower() not in ["mana potion", "health potion"]:
-                chosen_item.apply_to_player(player)
-                print(f"You use a {chosen_item.name} and it has its effects applied!")
-                
+                if (
+                    chosen_item.name.lower() == "mana potion"
+                    or chosen_item.name.lower() == "health potion"
+                ):
+                    chosen_item.apply_to_player(player)
+                    print(
+                        f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} HP!"
+                    )
+
+                elif chosen_item.name.lower() not in ["mana potion", "health potion"]:
+                    chosen_item.apply_to_player(player)
+                    print(
+                        f"You use a {chosen_item.name} and it has its effects applied!"
+                    )
             else:
                 print("Invalid item choice.")
 
