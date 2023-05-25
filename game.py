@@ -69,6 +69,9 @@ class Item(Base):
         player.defense += self.defense_inc
         player.hp += self.hp_inc
         player.max_hp += self.hp_inc
+        # Update other player stats if needed
+
+        player.inventory.remove(self)  # Remove the item from the player's inventory
 
 
 class Quest(Base):
@@ -183,6 +186,10 @@ def battle(player, quest):
                 chosen_item.apply_to_player(player)
                 print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} HP!")
 
+            elif chosen_item.name.lower() not in ["mana potion", "health potion"]:
+                chosen_item.apply_to_player(player)
+                print(f"You use a {chosen_item.name} and it has its effects applied!")
+                
             else:
                 print("Invalid item choice.")
 
@@ -207,7 +214,6 @@ def battle(player, quest):
                     return False
         else:
             print("Invalid action. Please try again.")
-
 
 
 def start_game():
@@ -259,8 +265,8 @@ def start_game():
             player.inventory.extend(
                 [
                     Item(name="Staff of Fire", attack_inc=15),
-                    Item(name="Robe of Protection", defense=3),
-                    Item(name="Mana Potion", mp=30),
+                    Item(name="Robe of Protection", defense_inc=3),
+                    Item(name="Mana Potion", hp_inc=30),
                 ]
             )
         elif char_class.lower() == "rogue":
@@ -271,8 +277,8 @@ def start_game():
             player.inventory.extend(
                 [
                     Item(name="Dagger of Agility", attack_inc=12),
-                    Item(name="Cloak of Shadows", defense=2),
-                    Item(name="Evasion Potion", evasion=10),
+                    Item(name="Cloak of Shadows", defense_inc=2),
+                    Item(name="Evasion Potion", evasion_inc=10),
                 ]
             )
         else:
@@ -307,7 +313,7 @@ def start_game():
             # Update player's stats and handle level up
             # ...
         else:
-            print("Game over.")
+            print("Game over!")
             break
 
 
