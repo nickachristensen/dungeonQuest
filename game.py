@@ -16,9 +16,10 @@ class Player(Base):
     gold = Column(Integer)
     hp = Column(Integer)
     max_hp = Column(Integer)
-    attack = Column(Integer)  # New attribute
+    attack = Column(Integer)
+    defense = Column(Integer)  # New attribute
 
-    def __init__(self, name, char_class, level, experience, gold, hp, max_hp, attack):
+    def __init__(self, name, char_class, level, experience, gold, hp, max_hp, attack, defense):
         self.name = name
         self.char_class = char_class
         self.level = level
@@ -27,9 +28,9 @@ class Player(Base):
         self.hp = hp
         self.max_hp = max_hp
         self.attack = attack
+        self.defense = defense
 
     quests = relationship("Quest", back_populates="player")
-
 
 class Quest(Base):
     __tablename__ = "quests"
@@ -180,48 +181,44 @@ def start_game():
     else:
         # Create a new player
         player = Player(
-            name=name,
-            char_class=char_class,
-            level=1,
-            experience=0,
-            gold=50,
-            hp=0,  # Add default values for hp, max_hp, and attack
-            max_hp=0,
-            attack=0
+            name=name, char_class=char_class, level=1, experience=0, gold=50,
+            hp=0, max_hp=0, attack=0, defense=0  # Initialize defense to 0
         )
 
-    # Assign max_hp, hp, and attack based on the chosen class
-    if char_class.lower() == "warrior":
-        player.max_hp = 100
-        player.hp = player.max_hp
-        player.attack = 20
-    elif char_class.lower() == "mage":
-        player.max_hp = 80
-        player.hp = player.max_hp
-        player.attack = 30
-    elif char_class.lower() == "rogue":
-        player.max_hp = 60
-        player.hp = player.max_hp
-        player.attack = 40
-    else:
-        player.max_hp = 100  # Default max_hp value
-        player.hp = player.max_hp
-        player.attack = 10  # Default attack value
+        # Assign max_hp, hp, and attack based on the chosen class
+        if char_class.lower() == "warrior":
+            player.max_hp = 100
+            player.hp = player.max_hp
+            player.attack = 20
+            player.defense = 10  # Set defense for warrior class
+        elif char_class.lower() == "mage":
+            player.max_hp = 80
+            player.hp = player.max_hp
+            player.attack = 30
+            player.defense = 5  # Set defense for mage class
+        elif char_class.lower() == "rogue":
+            player.max_hp = 60
+            player.hp = player.max_hp
+            player.attack = 40
+            player.defense = 3  # Set defense for rogue class
+        else:
+            player.max_hp = 100  # Default max_hp value
+            player.hp = player.max_hp
+            player.attack = 10  # Default attack value
+            player.defense = 0  # Default defense value
 
-    player.hp = player.max_hp  # Assign initial HP
+        session.add(player)
+        session.commit()
 
-    session.add(player)
-    session.commit()
+        print(f"Welcome, {player.name} the {player.char_class}!")
 
-    print(f"Welcome, {player.name} the {player.char_class}!")
-
-    # Generate initial quests for the player
-    num_initial_quests = 3
-    for _ in range(num_initial_quests):
-        monster, quest_name = generate_quest()
-        new_quest = Quest(name=quest_name, monster=monster, player_id=player.id)
-        session.add(new_quest)
-    session.commit()
+        # Generate initial quests for the player
+        num_initial_quests = 3
+        for _ in range(num_initial_quests):
+            monster, quest_name = generate_quest()
+            new_quest = Quest(name=quest_name, monster=monster, player_id=player.id)
+            session.add(new_quest)
+        session.commit()
 
     while True:
         chosen_quest = choose_quest(player)
@@ -238,6 +235,7 @@ def start_game():
         else:
             print("Game over.")
             break
+
 
 
 start_game()
