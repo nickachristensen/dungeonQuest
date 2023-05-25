@@ -7,7 +7,8 @@ Base = declarative_base()
 
 
 class Player(Base):
-    __tablename__ = "players"
+    __tablename__ = 'players'
+
     id = Column(Integer, primary_key=True)
     name = Column(String)
     char_class = Column(String)
@@ -17,7 +18,8 @@ class Player(Base):
     hp = Column(Integer)
     max_hp = Column(Integer)
     attack = Column(Integer)
-    defense = Column(Integer)  # New attribute
+    defense = Column(Integer)
+    inventory = relationship("Item", backref="player") 
 
     def __init__(self, name, char_class, level, experience, gold, hp, max_hp, attack, defense):
         self.name = name
@@ -29,8 +31,30 @@ class Player(Base):
         self.max_hp = max_hp
         self.attack = attack
         self.defense = defense
+        self.inventory = []  # Initialize inventory as an empty list
+
+    def __repr__(self):
+        return f"Player(name='{self.name}', char_class='{self.char_class}', level={self.level}, hp={self.hp})"
 
     quests = relationship("Quest", back_populates="player")
+
+class Item(Base):
+    __tablename__ = 'items'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    player_id = Column(Integer, ForeignKey('players.id'))  # Foreign key relationship
+
+    def __init__(self, name, attack=0, defense=0, hp=0, mp=0, evasion=0):
+        self.name = name
+        self.attack = attack
+        self.defense = defense
+        self.hp = hp
+        self.mp = mp
+        self.evasion = evasion
+        
+    def __repr__(self):
+        return f"Item(name='{self.name}')"
 
 class Quest(Base):
     __tablename__ = "quests"
@@ -191,16 +215,31 @@ def start_game():
             player.hp = player.max_hp
             player.attack = 20
             player.defense = 10  # Set defense for warrior class
+            player.inventory.extend([
+            Item(name='Sword of Strength', attack=10),
+            Item(name='Shield of Defense', defense=5),
+            Item(name='Health Potion', hp=20)
+        ])
         elif char_class.lower() == "mage":
             player.max_hp = 80
             player.hp = player.max_hp
             player.attack = 30
             player.defense = 5  # Set defense for mage class
+            player.inventory.extend([
+            Item(name='Staff of Fire', attack=15),
+            Item(name='Robe of Protection', defense=3),
+            Item(name='Mana Potion', mp=30)
+        ])
         elif char_class.lower() == "rogue":
             player.max_hp = 60
             player.hp = player.max_hp
             player.attack = 40
             player.defense = 3  # Set defense for rogue class
+            player.inventory.extend([
+            Item(name='Dagger of Agility', attack=12),
+            Item(name='Cloak of Shadows', defense=2),
+            Item(name='Evasion Potion', evasion=10)
+        ])
         else:
             player.max_hp = 100  # Default max_hp value
             player.hp = player.max_hp
