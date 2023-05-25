@@ -7,7 +7,7 @@ Base = declarative_base()
 
 
 class Player(Base):
-    __tablename__ = 'players'
+    __tablename__ = "players"
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -19,9 +19,11 @@ class Player(Base):
     max_hp = Column(Integer)
     attack = Column(Integer)
     defense = Column(Integer)
-    inventory = relationship("Item", backref="player") 
+    inventory = relationship("Item", backref="player")
 
-    def __init__(self, name, char_class, level, experience, gold, hp, max_hp, attack, defense):
+    def __init__(
+        self, name, char_class, level, experience, gold, hp, max_hp, attack, defense
+    ):
         self.name = name
         self.char_class = char_class
         self.level = level
@@ -38,23 +40,32 @@ class Player(Base):
 
     quests = relationship("Quest", back_populates="player")
 
+
 class Item(Base):
-    __tablename__ = 'items'
+    __tablename__ = "items"
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    player_id = Column(Integer, ForeignKey('players.id'))  # Foreign key relationship
+    attack_inc = Column(Integer)
+    defense_inc = Column(Integer)
+    hp_inc = Column(Integer)
+    mp_inc = Column(Integer)
+    evasion_inc = Column(Integer)
+    player_id = Column(Integer, ForeignKey("players.id"))  # Foreign key relationship
 
-    def __init__(self, name, attack=0, defense=0, hp=0, mp=0, evasion=0):
+    def __init__(self, name, attack_inc=0, defense_inc=0, hp_inc=0, mp_inc=0, evasion_inc=0):
         self.name = name
-        self.attack = attack
-        self.defense = defense
-        self.hp = hp
-        self.mp = mp
-        self.evasion = evasion
-        
+        self.attack_inc = attack_inc
+        self.defense_inc = defense_inc
+        self.hp_inc = hp_inc
+        self.mp_inc = mp_inc
+        self.evasion_inc = evasion_inc
+
     def __repr__(self):
         return f"Item(name='{self.name}')"
+
+
+
 
 class Quest(Base):
     __tablename__ = "quests"
@@ -138,55 +149,61 @@ def battle(player, quest):
             player_dmg = random.randint(1, player.attack)
             monster_stats["hp"] -= player_dmg
             print(f"You attack the {monster} and deal {player_dmg} damage!")
+
             if monster_stats["hp"] <= 0:
                 print(f"You defeated the {monster}!")
                 return True
             monster_dmg = random.randint(1, monster_stats["attack"]) - player.defense
+
             if monster_dmg < 0:
                 monster_dmg = 0
             player.hp -= monster_dmg
             print(f"The {monster} attacks you and deals {monster_dmg} damage!")
+
             if player.hp <= 0:
                 print("You have been defeated!")
                 return False
+
         elif action == "2":
             print(f"The {monster} attacks you but deals no damage!")
             player.defense //= 2
+
         elif action == "3":
-            print("Inventory:")
-            for i, item in enumerate(player.inventory):
-                print(f"{i + 1}. {item}")
-            item_choice = input("Enter the number of the item you want to use: ")
-            while item_choice not in [
-                str(i) for i in range(1, len(player.inventory) + 1)
-            ]:
-                item_choice = input(
-                    "Invalid choice. Please enter the number of the item you want to use: "
-                )
-            item = player.inventory.pop(int(item_choice) - 1)
-            if item.lower() == "potion":
-                player.hp += 10
-                if player.hp > player.max_hp:
-                    player.hp = player.max_hp
-                print("You use a Potion and recover 10 HP!")
+            print("\nInventory:")
+            for i, item in enumerate(player.inventory, 1):
+                print(f"{i}. {item}")
+            item_choice = int(input("Enter the number of the item you want to use: "))
+            chosen_item = player.inventory[item_choice - 1]
+
+            if chosen_item.name.lower() == "mana potion" or chosen_item.name.lower() == "health potion":
+                chosen_item.apply_to_player(player)
+                print(f"You use a {chosen_item.name} and recover {chosen_item.hp} HP!")
+
+            else:
+                print("Invalid item choice.")
+
         elif action == "4":
             if random.random() < 0.5:
                 print("You managed to escape!")
                 return False
+
             else:
                 print(f"The {monster} blocks your escape!")
                 monster_dmg = (
                     random.randint(1, monster_stats["attack"]) - player.defense
                 )
+
                 if monster_dmg < 0:
                     monster_dmg = 0
                 player.hp -= monster_dmg
                 print(f"The {monster} attacks you and deals {monster_dmg} damage!")
+
                 if player.hp <= 0:
                     print("You have been defeated!")
                     return False
         else:
             print("Invalid action. Please try again.")
+
 
 
 def start_game():
@@ -205,8 +222,15 @@ def start_game():
     else:
         # Create a new player
         player = Player(
-            name=name, char_class=char_class, level=1, experience=0, gold=50,
-            hp=0, max_hp=0, attack=0, defense=0  # Initialize defense to 0
+            name=name,
+            char_class=char_class,
+            level=1,
+            experience=0,
+            gold=50,
+            hp=0,
+            max_hp=0,
+            attack=0,
+            defense=0,  # Initialize defense to 0
         )
 
         # Assign max_hp, hp, and attack based on the chosen class
@@ -215,31 +239,38 @@ def start_game():
             player.hp = player.max_hp
             player.attack = 20
             player.defense = 10  # Set defense for warrior class
-            player.inventory.extend([
-            Item(name='Sword of Strength', attack=10),
-            Item(name='Shield of Defense', defense=5),
-            Item(name='Health Potion', hp=20)
-        ])
+            player.inventory.extend(
+                [
+                    Item(name="Sword of Strength", attack_inc=10),
+                    Item(name="Shield of Defense", defense_inc=5),
+                    Item(name="Health Potion", hp_inc=20),
+                ]
+            )
+
         elif char_class.lower() == "mage":
             player.max_hp = 80
             player.hp = player.max_hp
             player.attack = 30
             player.defense = 5  # Set defense for mage class
-            player.inventory.extend([
-            Item(name='Staff of Fire', attack=15),
-            Item(name='Robe of Protection', defense=3),
-            Item(name='Mana Potion', mp=30)
-        ])
+            player.inventory.extend(
+                [
+                    Item(name="Staff of Fire", attack_inc=15),
+                    Item(name="Robe of Protection", defense=3),
+                    Item(name="Mana Potion", mp=30),
+                ]
+            )
         elif char_class.lower() == "rogue":
             player.max_hp = 60
             player.hp = player.max_hp
             player.attack = 40
             player.defense = 3  # Set defense for rogue class
-            player.inventory.extend([
-            Item(name='Dagger of Agility', attack=12),
-            Item(name='Cloak of Shadows', defense=2),
-            Item(name='Evasion Potion', evasion=10)
-        ])
+            player.inventory.extend(
+                [
+                    Item(name="Dagger of Agility", attack_inc=12),
+                    Item(name="Cloak of Shadows", defense=2),
+                    Item(name="Evasion Potion", evasion=10),
+                ]
+            )
         else:
             player.max_hp = 100  # Default max_hp value
             player.hp = player.max_hp
@@ -276,6 +307,4 @@ def start_game():
             break
 
 
-
 start_game()
-
