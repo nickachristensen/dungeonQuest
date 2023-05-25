@@ -64,7 +64,11 @@ class Item(Base):
     def __repr__(self):
         return f"Item(name='{self.name}')"
 
-
+    def apply_to_player(self, player):
+        player.attack += self.attack_inc
+        player.defense += self.defense_inc
+        player.hp += self.hp_inc
+        player.max_hp += self.hp_inc
 
 
 class Quest(Base):
@@ -177,7 +181,7 @@ def battle(player, quest):
 
             if chosen_item.name.lower() == "mana potion" or chosen_item.name.lower() == "health potion":
                 chosen_item.apply_to_player(player)
-                print(f"You use a {chosen_item.name} and recover {chosen_item.hp} HP!")
+                print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} HP!")
 
             else:
                 print("Invalid item choice.")
