@@ -143,14 +143,21 @@ def start_game():
     name = input("Welcome to the Fantasy Game! What is your name? ")
     char_class = choose_class()
 
-    # Check if player of the chosen class already exists
-    existing_player = session.query(Player).filter_by(char_class=char_class).first()
-    if existing_player:
-        print(f"A player of class {char_class} already exists.")
-        return
-
     # Create a new player
     player = Player(name=name, char_class=char_class, level=1, experience=0, gold=50)
+
+    # Assign max_hp based on the chosen class
+    if char_class.lower() == 'warrior':
+        player.max_hp = 100
+    elif char_class.lower() == 'mage':
+        player.max_hp = 80
+    elif char_class.lower() == 'rogue':
+        player.max_hp = 60
+    else:
+        player.max_hp = 100  # Default max_hp value
+
+    player.hp = player.max_hp  # Assign initial HP
+
     session.add(player)
     session.commit()
 
