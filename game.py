@@ -143,33 +143,40 @@ def start_game():
     name = input("Welcome to the Fantasy Game! What is your name? ")
     char_class = choose_class()
 
-    # Create a new player
-    player = Player(name=name, char_class=char_class, level=1, experience=0, gold=50)
+    # Check if a player with the same name and class already exists
+    existing_player = session.query(Player).filter_by(name=name, char_class=char_class).first()
 
-    # Assign max_hp based on the chosen class
-    if char_class.lower() == 'warrior':
-        player.max_hp = 100
-    elif char_class.lower() == 'mage':
-        player.max_hp = 80
-    elif char_class.lower() == 'rogue':
-        player.max_hp = 60
+    if existing_player:
+        player = existing_player
+        print(f"Welcome back, {player.name} the {player.char_class}!")
     else:
-        player.max_hp = 100  # Default max_hp value
+        # Create a new player
+        player = Player(name=name, char_class=char_class, level=1, experience=0, gold=50)
 
-    player.hp = player.max_hp  # Assign initial HP
+        # Assign max_hp and hp based on the chosen class
+        if char_class.lower() == 'warrior':
+            player.max_hp = 100
+        elif char_class.lower() == 'mage':
+            player.max_hp = 80
+        elif char_class.lower() == 'rogue':
+            player.max_hp = 60
+        else:
+            player.max_hp = 100  # Default max_hp value
 
-    session.add(player)
-    session.commit()
+        player.hp = player.max_hp  # Assign initial HP
 
-    print(f"Welcome, {player.name} the {player.char_class}!")
+        session.add(player)
+        session.commit()
 
-    # Generate initial quests for the player
-    num_initial_quests = 3
-    for _ in range(num_initial_quests):
-        monster, quest_name = generate_quest()
-        new_quest = Quest(name=quest_name, monster=monster, player_id=player.id)
-        session.add(new_quest)
-    session.commit()
+        print(f"Welcome, {player.name} the {player.char_class}!")
+
+        # Generate initial quests for the player
+        num_initial_quests = 3
+        for _ in range(num_initial_quests):
+            monster, quest_name = generate_quest()
+            new_quest = Quest(name=quest_name, monster=monster, player_id=player.id)
+            session.add(new_quest)
+        session.commit()
 
     while True:
         chosen_quest = choose_quest(player)
@@ -182,6 +189,5 @@ def start_game():
         else:
             print("Game over.")
             break
-
 
 start_game()
