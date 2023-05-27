@@ -178,6 +178,10 @@ def battle(player, quest):
             player.defense //= 2
 
         elif action == "3":
+            if not player.inventory:  # Check if the inventory is empty
+                print("Your inventory is empty.")
+                continue  # Send the player back to the previous selection
+
             print("\nInventory:")
             for i, item in enumerate(player.inventory, 1):
                 print(f"{i}. {item}")
@@ -186,22 +190,16 @@ def battle(player, quest):
             if 1 <= item_choice <= len(player.inventory):
                 chosen_item = player.inventory[item_choice - 1]
 
-                if (
-                    chosen_item.name.lower() == "mana potion"
-                    or chosen_item.name.lower() == "health potion"
-                ):
+                if chosen_item.name.lower() == "mana potion" or chosen_item.name.lower() == "health potion":
                     chosen_item.apply_to_player(player)
-                    print(
-                        f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} HP!"
-                    )
+                    print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} HP!")
 
                 elif chosen_item.name.lower() not in ["mana potion", "health potion"]:
                     chosen_item.apply_to_player(player)
-                    print(
-                        f"You use a {chosen_item.name} and it has its effects applied!"
-                    )
+                    print(f"You use a {chosen_item.name} and it has its effects applied!")
             else:
                 print("Invalid item choice.")
+
 
         elif action == "4":
             if random.random() < 0.5:
