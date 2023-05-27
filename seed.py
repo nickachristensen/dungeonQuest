@@ -27,15 +27,17 @@ items_data = [
 for item_data in items_data:
     session.add(item_data)
 
-    # Seed the monsters
-    monsters_data = [
-        Monster(name="Goblin", max_hp=50, hp=50, attack=20, defense=5),
-        Monster(name="Dragon", max_hp=200, hp=200, attack=50, defense=10),
-        Monster(name="Skeleton", max_hp=30, hp=30, attack=15, defense=2),
-    ]
+# Seed the monsters
+monsters_data = [
+    Monster(name="Dragon", max_hp=200, hp=200, attack=50, defense=10),
+    Monster(name="Goblin", max_hp=50, hp=50, attack=20, defense=5),
+    Monster(name="Skeleton", max_hp=30, hp=30, attack=15, defense=2),
+    Monster(name="Troll", max_hp=100, hp=100, attack=30, defense=8),
+    Monster(name="Witch", max_hp=80, hp=80, attack=25, defense=5),
+]
 
-    for monster_data in monsters_data:
-        session.add(monster_data)
+for monster_data in monsters_data:
+    session.add(monster_data)
 
 # Commit the changes
 session.commit()
