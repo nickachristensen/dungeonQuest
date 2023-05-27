@@ -20,6 +20,7 @@ class Player(Base):
     attack = Column(Integer)
     defense = Column(Integer)
     inventory = relationship("Item", backref="player")
+    quests = relationship("Quest", back_populates="player")
 
     def __init__(
         self, name, char_class, level, experience, gold, hp, max_hp, attack, defense
@@ -37,8 +38,6 @@ class Player(Base):
 
     def __repr__(self):
         return f"Player(name='{self.name}', char_class='{self.char_class}', level={self.level}, hp={self.hp})"
-
-    quests = relationship("Quest", back_populates="player")
 
 
 class Item(Base):
@@ -311,18 +310,36 @@ def start_game():
     while True:
         chosen_quest = choose_quest(player)
         print(
-            f"You selected the {chosen_quest.name} quest - Defeat the {chosen_quest.monster}!"
+            f"You selected the quest '{chosen_quest.name}' to battle the {chosen_quest.monster}!"
         )
 
-        if battle(player, chosen_quest):
-            print(
-                f"You completed the {chosen_quest.name} quest and earned experience and gold!"
-            )
-            # Update player's stats and handle level up
-            # ...
+        result = battle(player, chosen_quest)
+
+        if result:
+            print("Congratulations, you have completed the quest!")
+            session.delete(chosen_quest)
+            session.commit()
+            player.experience += 100
+            player.gold += 50
+            level_up(player)
         else:
-            print("Game over!")
+            print("Game Over!")
             break
+
+
+def level_up(player):
+    # Check if the player has enough experience to level up
+    if player.experience >= 100:
+        player.level += 1
+        player.experience -= 100
+        player.max_hp += 10
+        player.hp = player.max_hp
+        player.attack += 5
+        player.defense += 2
+        print("Level up! You are now level", player.level)
+        print("Max HP increased to", player.max_hp)
+        print("Attack increased to", player.attack)
+        print("Defense increased to", player.defense)
 
 
 start_game()
