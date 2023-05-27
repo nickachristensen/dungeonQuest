@@ -1,5 +1,5 @@
 import random
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 
@@ -34,7 +34,7 @@ class Player(Base):
         self.max_hp = max_hp
         self.attack = attack
         self.defense = defense
-        self.inventory = []  # Initialize inventory as an empty list
+        self.inventory = []
 
     def __repr__(self):
         return f"Player(name='{self.name}', char_class='{self.char_class}', level={self.level}, hp={self.hp})"
@@ -50,7 +50,7 @@ class Item(Base):
     hp_inc = Column(Integer)
     mp_inc = Column(Integer)
     evasion_inc = Column(Integer)
-    player_id = Column(Integer, ForeignKey("players.id"))  # Foreign key relationship
+    players = relationship("Player", secondary="player_item_association")
 
     def __init__(
         self, name, attack_inc=0, defense_inc=0, hp_inc=0, mp_inc=0, evasion_inc=0
@@ -70,22 +70,59 @@ class Item(Base):
         player.defense += self.defense_inc
         player.hp += self.hp_inc
         player.max_hp += self.hp_inc
-        # Update other player stats if needed
-
-        player.inventory.remove(self)  # Remove the item from the player's inventory
+        player.inventory.remove(self)
 
 
 class Quest(Base):
     __tablename__ = "quests"
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    monster = Column(String)
     player_id = Column(Integer, ForeignKey("players.id"))
-
     player = relationship("Player", back_populates="quests")
+    items = relationship("Item", secondary="quest_item_association")
+    monsters = relationship("Monster", secondary="quest_monster_association")
 
 
-# Set up the database
+class Monster(Base):
+    __tablename__ = "monsters"
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    hp = Column(Integer)
+    max_hp = Column(Integer)
+    attack = Column(Integer)
+    defense = Column(Integer)
+
+    def __init__(self, name, hp, max_hp, attack, defense):
+        self.name = name
+        self.hp = hp
+        self.max_hp = max_hp
+        self.attack = attack
+        self.defense = defense
+
+
+player_item_association = Table(
+    "player_item_association",
+    Base.metadata,
+    Column("player_id", Integer, ForeignKey("players.id")),
+    Column("item_id", Integer, ForeignKey("items.id")),
+)
+
+quest_item_association = Table(
+    "quest_item_association",
+    Base.metadata,
+    Column("quest_id", Integer, ForeignKey("quests.id")),
+    Column("item_id", Integer, ForeignKey("items.id")),
+)
+
+quest_monster_association = Table(
+    "quest_monster_association",
+    Base.metadata,
+    Column("quest_id", Integer, ForeignKey("quests.id")),
+    Column("monster_id", Integer, ForeignKey("monsters.id")),
+)
+
+
+# Create engine and tables
 engine = create_engine("sqlite:///game.db")
 Base.metadata.create_all(engine)
 
