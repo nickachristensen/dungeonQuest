@@ -1,141 +1,145 @@
-import random
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+import random  # Import the random module for generating random values
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Table  # Import SQLAlchemy modules
+from sqlalchemy.ext.declarative import declarative_base  # Import the declarative base class
+from sqlalchemy.orm import sessionmaker, relationship  # Import sessionmaker and relationship from SQLAlchemy
 
-Base = declarative_base()
+Base = declarative_base()  # Create a base class for SQLAlchemy models
 
 
-class Player(Base):
-    __tablename__ = "players"
+class Player(Base):  # Define the Player class, subclass of Base
+    __tablename__ = "players"  # Define the table name for the Player model in the database
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    char_class = Column(String)
-    level = Column(Integer)
-    experience = Column(Integer)
-    gold = Column(Integer)
-    hp = Column(Integer)
-    max_hp = Column(Integer)
-    attack = Column(Integer)
-    defense = Column(Integer)
-    inventory = relationship("Item", backref="player")
-    quests = relationship("Quest", back_populates="player")
+    # Define columns for the Player table
+    id = Column(Integer, primary_key=True)  # Player ID column
+    name = Column(String)  # Player name column
+    char_class = Column(String)  # Player character class column
+    level = Column(Integer)  # Player level column
+    experience = Column(Integer)  # Player experience column
+    gold = Column(Integer)  # Player gold column
+    hp = Column(Integer)  # Player health points column
+    max_hp = Column(Integer)  # Player maximum health points column
+    attack = Column(Integer)  # Player attack power column
+    defense = Column(Integer)  # Player defense power column
+    inventory = relationship("Item", backref="player")  # Define a relationship with the Item model
+    quests = relationship("Quest", back_populates="player")  # Define a relationship with the Quest model
 
-    def __init__(
-        self, name, char_class, level, experience, gold, hp, max_hp, attack, defense
-    ):
-        self.name = name
-        self.char_class = char_class
-        self.level = level
-        self.experience = experience
-        self.gold = gold
-        self.hp = hp
-        self.max_hp = max_hp
-        self.attack = attack
-        self.defense = defense
-        self.inventory = []
+    def __init__(self, name, char_class, level, experience, gold, hp, max_hp, attack, defense):
+    # Initialize the Player object with provided values
+        self.name = name  # Assign the 'name' parameter to the 'name' instance variable
+        self.char_class = char_class  # Assign the 'char_class' parameter to the 'char_class' instance variable
+        self.level = level  # Assign the 'level' parameter to the 'level' instance variable
+        self.experience = experience  # Assign the 'experience' parameter to the 'experience' instance variable
+        self.gold = gold  # Assign the 'gold' parameter to the 'gold' instance variable
+        self.hp = hp  # Assign the 'hp' parameter to the 'hp' instance variable
+        self.max_hp = max_hp  # Assign the 'max_hp' parameter to the 'max_hp' instance variable
+        self.attack = attack  # Assign the 'attack' parameter to the 'attack' instance variable
+        self.defense = defense  # Assign the 'defense' parameter to the 'defense' instance variable
+        self.inventory = []  # Initialize the 'inventory' instance variable as an empty list
+
+def __repr__(self):
+    # Return a string representation of the Player object
+    return f"Player(name='{self.name}', char_class='{self.char_class}', level={self.level}, hp={self.hp})"
+
+
+
+class Item(Base):  # Define the Item class, subclass of Base
+    __tablename__ = "items"  # Define the table name for the Item model in the database
+
+    # Define columns for the Item table
+    id = Column(Integer, primary_key=True)  # Item ID column
+    name = Column(String)  # Item name column
+    attack_inc = Column(Integer)  # Attack increment column
+    defense_inc = Column(Integer)  # Defense increment column
+    hp_inc = Column(Integer)  # Health points increment column
+    mp_inc = Column(Integer)  # Mana points increment column
+    evasion_inc = Column(Integer)  # Evasion increment column
+    player_id = Column(Integer, ForeignKey("players.id"))  # Player ID foreign key column
+
+def __init__(self, name, attack_inc=0, defense_inc=0, hp_inc=0, mp_inc=0, evasion_inc=0):
+    # Initialize the Item object with provided values
+    self.name = name  # Assign the 'name' parameter to the 'name' instance variable
+    self.attack_inc = attack_inc  # Assign the 'attack_inc' parameter to the 'attack_inc' instance variable
+    self.defense_inc = defense_inc  # Assign the 'defense_inc' parameter to the 'defense_inc' instance variable
+    self.hp_inc = hp_inc  # Assign the 'hp_inc' parameter to the 'hp_inc' instance variable
+    self.mp_inc = mp_inc  # Assign the 'mp_inc' parameter to the 'mp_inc' instance variable
+    self.evasion_inc = evasion_inc  # Assign the 'evasion_inc' parameter to the 'evasion_inc' instance variable
 
     def __repr__(self):
-        return f"Player(name='{self.name}', char_class='{self.char_class}', level={self.level}, hp={self.hp})"
-
-
-class Item(Base):
-    __tablename__ = "items"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    attack_inc = Column(Integer)
-    defense_inc = Column(Integer)
-    hp_inc = Column(Integer)
-    mp_inc = Column(Integer)
-    evasion_inc = Column(Integer)
-    player_id = Column(Integer, ForeignKey("players.id"))
-
-    def __init__(
-        self, name, attack_inc=0, defense_inc=0, hp_inc=0, mp_inc=0, evasion_inc=0
-    ):
-        self.name = name
-        self.attack_inc = attack_inc
-        self.defense_inc = defense_inc
-        self.hp_inc = hp_inc
-        self.mp_inc = mp_inc
-        self.evasion_inc = evasion_inc
-
-    def __repr__(self):
+        # Return a string representation of the Item object
         return f"Item(name='{self.name}')"
 
-    def apply_to_player(self, player):
-        player.attack += self.attack_inc
-        player.defense += self.defense_inc
-        player.hp += self.hp_inc
-        player.max_hp += self.hp_inc
-        player.inventory.remove(self)
+def apply_to_player(self, player):
+    # Apply the effects of the item to the player
+    player.attack += self.attack_inc  # Increase the player's attack by the 'attack_inc' value of the item
+    player.defense += self.defense_inc  # Increase the player's defense by the 'defense_inc' value of the item
+    player.hp += self.hp_inc  # Increase the player's HP by the 'hp_inc' value of the item
+    player.max_hp += self.hp_inc  # Increase the player's max HP by the 'hp_inc' value of the item
+    player.inventory.remove(self)  # Remove the item from the player's inventory
 
 
-class Quest(Base):
-    __tablename__ = "quests"
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    monster = Column(String)
-    player_id = Column(Integer, ForeignKey("players.id"))
-    player = relationship("Player", back_populates="quests")
-    items = relationship("Item", secondary="quest_item_association")
-    monsters = relationship("Monster", secondary="quest_monster_association")
+class Quest(Base):  # Define the Quest class, subclass of Base
+    __tablename__ = "quests"  # Define the table name for the Quest model in the database
+    id = Column(Integer, primary_key=True)  # Quest ID column
+    name = Column(String)  # Quest name column
+    monster = Column(String)  # Monster column
+    player_id = Column(Integer, ForeignKey("players.id"))  # Player ID foreign key column
+    player = relationship("Player", back_populates="quests")  # Define a relationship with the Player model
+    items = relationship("Item", secondary="quest_item_association")  # Define a relationship with the Item model
+    monsters = relationship("Monster", secondary="quest_monster_association")  # Define a relationship with the Monster model
 
 
-class Monster(Base):
-    __tablename__ = "monsters"
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    hp = Column(Integer)
-    max_hp = Column(Integer)
-    attack = Column(Integer)
-    defense = Column(Integer)
+class Monster(Base):  # Define the Monster class, subclass of Base
+    __tablename__ = "monsters"  # Define the table name for the Monster model in the database
+    id = Column(Integer, primary_key=True)  # Monster ID column
+    name = Column(String)  # Monster name column
+    hp = Column(Integer)  # Monster health points column
+    max_hp = Column(Integer)  # Monster maximum health points column
+    attack = Column(Integer)  # Monster attack power column
+    defense = Column(Integer)  # Monster defense power column
 
-    def __init__(self, name, hp, max_hp, attack, defense):
-        self.name = name
-        self.hp = hp
-        self.max_hp = max_hp
-        self.attack = attack
-        self.defense = defense
+def __init__(self, name, hp, max_hp, attack, defense):
+    # Initialize the Monster object with provided values
+    self.name = name  # Store the name of the monster
+    self.hp = hp  # Store the current hit points of the monster
+    self.max_hp = max_hp  # Store the maximum hit points of the monster
+    self.attack = attack  # Store the attack power of the monster
+    self.defense = defense  # Store the defense power of the monster
 
 
 player_item_association = Table(
-    "player_item_association",
-    Base.metadata,
-    Column("player_id", Integer, ForeignKey("players.id")),
-    Column("item_id", Integer, ForeignKey("items.id")),
+    "player_item_association",  # Define the name of the association table
+    Base.metadata,  # Use the metadata from the declarative base
+    Column("player_id", Integer, ForeignKey("players.id")),  # Define a column for player_id, referencing players.id
+    Column("item_id", Integer, ForeignKey("items.id")),  # Define a column for item_id, referencing items.id
 )
 
 quest_item_association = Table(
-    "quest_item_association",
-    Base.metadata,
-    Column("quest_id", Integer, ForeignKey("quests.id")),
-    Column("item_id", Integer, ForeignKey("items.id")),
+    "quest_item_association",  # Define the name of the association table
+    Base.metadata,  # Use the metadata from the declarative base
+    Column("quest_id", Integer, ForeignKey("quests.id")),  # Define a column for quest_id, referencing quests.id
+    Column("item_id", Integer, ForeignKey("items.id")),  # Define a column for item_id, referencing items.id
 )
 
 quest_monster_association = Table(
-    "quest_monster_association",
-    Base.metadata,
-    Column("quest_id", Integer, ForeignKey("quests.id")),
-    Column("monster_id", Integer, ForeignKey("monsters.id")),
+    "quest_monster_association",  # Define the name of the association table
+    Base.metadata,  # Use the metadata from the declarative base
+    Column("quest_id", Integer, ForeignKey("quests.id")),  # Define a column for quest_id, referencing quests.id
+    Column("monster_id", Integer, ForeignKey("monsters.id")),  # Define a column for monster_id, referencing monsters.id
 )
 
 
-# Create engine and tables
-engine = create_engine("sqlite:///game.db")
-Base.metadata.create_all(engine)
+engine = create_engine("sqlite:///game.db")  # Create an SQLite database engine
+Base.metadata.create_all(engine)  # Create the tables defined in the models
 
-# Create a session
-Session = sessionmaker(bind=engine)
-session = Session()
+Session = sessionmaker(bind=engine)  # Create a session factory
+session = Session()  # Create a session object
 
 
-# Quest generator function
 def generate_quest():
-    monsters = ["Dragon", "Goblin", "Skeleton", "Troll", "Witch"]
-    quest_names = [
+    # Generate a random quest and monster name from predefined lists
+
+    monsters = ["Dragon", "Goblin", "Skeleton", "Troll", "Witch"]  # List of available monster names
+    quest_names = [  # List of available quest names
         "The Lost Artifact",
         "The Dark Forest",
         "Caverns of Despair",
@@ -143,78 +147,95 @@ def generate_quest():
         "The Enchanted Ruins",
     ]
 
-    monster = random.choice(monsters)
-    quest_name = random.choice(quest_names)
+    monster = random.choice(monsters)  # Select a random monster name from the list
+    quest_name = random.choice(quest_names)  # Select a random quest name from the list
 
-    return monster, quest_name
+    return monster, quest_name  # Return the randomly generated monster name and quest name as a tuple
 
 
 def choose_class():
-    char_class = input("Choose your class: (Warrior, Mage, Rogue) ")
-    while char_class.lower() not in ["warrior", "mage", "rogue"]:
-        char_class = input(
-            "Invalid class. Please choose again: (Warrior, Mage, Rogue) "
-        )
-    return char_class.capitalize()
+    # Prompt the user to choose a character class
+
+    char_class = input("Choose your class: (Warrior, Mage, Rogue) ")  # Prompt the user for input
+    while char_class.lower() not in ["warrior", "mage", "rogue"]:  # Validate the input
+        char_class = input("Invalid class. Please choose again: (Warrior, Mage, Rogue) ")
+    return char_class.capitalize()  # Return the chosen character class
 
 
 def choose_quest(player):
+    # Display the available quests for the player and prompt for a quest choice
+
     print("Available quests:")
-    quests = session.query(Quest).filter_by(player_id=player.id).all()
-    for i, quest in enumerate(quests):
+    quests = session.query(Quest).filter_by(player_id=player.id).all()  # Retrieve the quests for the player
+    for i, quest in enumerate(quests):  # Iterate over the quests and display their names with corresponding numbers
         print(f"{i + 1}. {quest.name}")
-    quest_choice = input("Enter the number of your choice: ")
-    while quest_choice not in [str(i) for i in range(1, len(quests) + 1)]:
+
+    quest_choice = input("Enter the number of your choice: ")  # Prompt the user for quest choice
+    while quest_choice not in [str(i) for i in range(1, len(quests) + 1)]:  # Validate the input
         quest_choice = input("Invalid choice. Please enter the number of your choice: ")
-    return quests[int(quest_choice) - 1]
+
+    return quests[int(quest_choice) - 1]  # Return the chosen quest
+
 
 
 def battle(player, quest):
+    # Simulate a battle between the player and a monster in a quest
+
     monster = quest.monster
-    print(f"A wild {monster} appears!")
+    print(f"A wild {monster} appears!")  # Display the monster's name
 
     monster_stats = {
-        "hp": random.randint(50, 100),
-        "max_hp": random.randint(80, 120),
-        "attack": random.randint(10, 20),
+        "hp": random.randint(50, 100),  # Randomly generate the monster's HP
+        "max_hp": random.randint(80, 120),  # Randomly generate the monster's maximum HP
+        "attack": random.randint(10, 20),  # Randomly generate the monster's attack power
     }
 
     while True:
-        print(
-            f"Your HP: {player.hp}/{player.max_hp}\t{monster} HP: {monster_stats['hp']}/{monster_stats['max_hp']}"
-        )
+        # Print the current HP of the player and the monster, and display available actions
+
+        print(f"Your HP: {player.hp}/{player.max_hp}\t{monster} HP: {monster_stats['hp']}/{monster_stats['max_hp']}")
         print("Actions:")
         print("1. Attack")
         print("2. Defend")
         print("3. Use Item")
         print("4. Run")
 
-        action = input("Choose an action: ")
+        action = input("Choose an action: ")  # Prompt the player to choose an action
 
         if action == "1":
-            player_dmg = random.randint(1, player.attack)
-            monster_stats["hp"] -= player_dmg
+            # Player attacks the monster
+
+            player_dmg = random.randint(1, player.attack)  # Calculate the player's damage
+            monster_stats["hp"] -= player_dmg  # Reduce the monster's HP
             print(f"You attack the {monster} and deal {player_dmg} damage!")
 
             if monster_stats["hp"] <= 0:
+                # Check if the monster is defeated
                 print(f"You defeated the {monster}!")
                 return True
-            monster_dmg = random.randint(1, monster_stats["attack"]) - player.defense
+
+            monster_dmg = random.randint(1, monster_stats["attack"]) - player.defense  # Calculate the monster's damage to the player
 
             if monster_dmg < 0:
                 monster_dmg = 0
-            player.hp -= monster_dmg
+
+            player.hp -= monster_dmg  # Reduce the player's HP based on the monster's damage
             print(f"The {monster} attacks you and deals {monster_dmg} damage!")
 
             if player.hp <= 0:
+                # Check if the player is defeated
                 print("You have been defeated!")
                 return False
 
         elif action == "2":
+            # Player defends against the monster's attack
+
             print(f"The {monster} attacks you but deals no damage!")
-            player.defense //= 2
+            player.defense //= 2  # Halve the player's defense temporarily
 
         elif action == "3":
+            # Player uses an item from their inventory
+
             if not player.inventory:  # Check if the inventory is empty
                 print("Your inventory is empty.")
                 continue  # Send the player back to the previous selection
@@ -222,24 +243,31 @@ def battle(player, quest):
             print("\nInventory:")
             for i, item in enumerate(player.inventory, 1):
                 print(f"{i}. {item}")
-            item_choice = int(input("Enter the number of the item you want to use: "))
+
+            item_choice = int(input("Enter the number of the item you want to use: "))  # Prompt the player to choose an item
 
             if 1 <= item_choice <= len(player.inventory):
-                chosen_item = player.inventory[item_choice - 1]
+                # Validate the item choice
+
+                chosen_item = player.inventory[item_choice - 1]  # Retrieve the chosen item from the inventory
 
                 if chosen_item.name.lower() == "mana potion" or chosen_item.name.lower() == "health potion":
+                    # Apply health restoration for health and mana potions
                     chosen_item.apply_to_player(player)
                     print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} HP!")
 
                 elif chosen_item.name.lower() not in ["mana potion", "health potion"]:
+                    # Apply item effects for other items
                     chosen_item.apply_to_player(player)
                     print(f"You use a {chosen_item.name} and it has its effects applied!")
             else:
                 print("Invalid item choice.")
 
-
         elif action == "4":
+            # Attempt to run away from the battle
+
             if random.random() < 0.5:
+                # Random chance of successfully escaping
                 print("You managed to escape!")
                 return False
 
@@ -247,21 +275,25 @@ def battle(player, quest):
                 print(f"The {monster} blocks your escape!")
                 monster_dmg = (
                     random.randint(1, monster_stats["attack"]) - player.defense
-                )
+                )  # Calculate the monster's damage to the player during escape
 
                 if monster_dmg < 0:
                     monster_dmg = 0
-                player.hp -= monster_dmg
+
+                player.hp -= monster_dmg  # Reduce the player's HP based on the monster's damage
                 print(f"The {monster} attacks you and deals {monster_dmg} damage!")
 
                 if player.hp <= 0:
+                    # Check if the player is defeated during escape
                     print("You have been defeated!")
                     return False
         else:
-            print("Invalid action. Please try again.")
+            print("Invalid action. Please try again.")  # Display an error message for invalid actions
+
 
 
 def start_game():
+    # Start the game and prompt for player's name and class
     name = input("Welcome to Dungeon Quest! What is your name? ")
     char_class = choose_class()
 
@@ -332,8 +364,8 @@ def start_game():
             player.attack = 10  # Default attack value
             player.defense = 0  # Default defense value
 
-        session.add(player)
-        session.commit()
+        session.add(player)  # Add the player to the session
+        session.commit()  # Commit the changes to the database
 
         print(f"Welcome, {player.name} the {player.char_class}!")
 
@@ -342,42 +374,41 @@ def start_game():
         for _ in range(num_initial_quests):
             monster, quest_name = generate_quest()
             new_quest = Quest(name=quest_name, monster=monster, player_id=player.id)
-            session.add(new_quest)
-        session.commit()
+            session.add(new_quest)  # Add the quest to the session
+        session.commit()  # Commit the changes to the database
 
     while True:
-        chosen_quest = choose_quest(player)
+        chosen_quest = choose_quest(player)  # Prompt for a quest choice
         print(
             f"You selected the quest '{chosen_quest.name}' to battle the {chosen_quest.monster}!"
         )
 
-        result = battle(player, chosen_quest)
+        result = battle(player, chosen_quest)  # Start the battle
 
         if result:
             print("Congratulations, you have completed the quest!")
-            session.delete(chosen_quest)
-            session.commit()
-            player.experience += 100
-            player.gold += 50
-            level_up(player)
+            session.delete(chosen_quest)  # Remove the quest from the session
+            session.commit()  # Commit the changes to the database
+            player.experience += 100  # Increase player experience
+            player.gold += 50  # Increase player gold
+            level_up(player)  # Level up the player
         else:
             print("Game Over!")
             break
 
 
 def level_up(player):
-    # Check if the player has enough experience to level up
+    # Level up the player if they have enough experience
     if player.experience >= 100:
-        player.level += 1
-        player.experience -= 100
-        player.max_hp += 10
-        player.hp = player.max_hp
-        player.attack += 5
-        player.defense += 2
-        print("Level up! You are now level", player.level)
-        print("Max HP increased to", player.max_hp)
-        print("Attack increased to", player.attack)
-        print("Defense increased to", player.defense)
+        player.level += 1  # Increase the player's level by 1
+        player.experience -= 100  # Subtract the required experience for leveling up from the player's current experience
+        player.max_hp += 10  # Increase the player's maximum HP by 10
+        player.hp = player.max_hp  # Set the player's current HP equal to their maximum HP
+        player.attack += 5  # Increase the player's attack power by 5
+        player.defense += 2  # Increase the player's defense power by 2
+        print("Level up! You are now level", player.level)  # Display a message indicating that the player has leveled up and their new level
+        print("Max HP increased to", player.max_hp)  # Display a message indicating that the player's maximum HP has increased
+        print("Attack increased to", player.attack)  # Display a message indicating that the player's attack power has increased
+        print("Defense increased to", player.defense)  # Display a message indicating that the player's defense power has increased
 
-
-start_game()
+start_game()  # Start the game
