@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from models import Base, Item, Monster
+from models import Base, Item, Monster, Quest
 
 # Create an engine and session
 engine = create_engine('sqlite:///game.db')
@@ -38,6 +38,20 @@ monsters_data = [
 
 for monster_data in monsters_data:
     session.add(monster_data)
+
+# Seed the quests
+quest_names = [
+    "The Lost Artifact",
+    "The Dark Forest",
+    "Caverns of Despair",
+    "The Forbidden Tower",
+    "The Enchanted Ruins",
+]
+
+for quest_name in quest_names:
+    quest = Quest(name=quest_name)
+    quest.monsters.append(Monster(name="Dragon", max_hp=200, hp=200, attack=50, defense=10))
+    session.add(quest)
 
 # Commit the changes
 session.commit()
