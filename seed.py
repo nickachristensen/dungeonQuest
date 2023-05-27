@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from models import Base, Item
+from models import Base, Item, Monster
 
 # Create an engine and session
 engine = create_engine('sqlite:///game.db')
@@ -26,6 +26,16 @@ items_data = [
 
 for item_data in items_data:
     session.add(item_data)
+
+    # Seed the monsters
+    monsters_data = [
+        Monster(name="Goblin", max_hp=50, hp=50, attack=20, defense=5),
+        Monster(name="Dragon", max_hp=200, hp=200, attack=50, defense=10),
+        Monster(name="Skeleton", max_hp=30, hp=30, attack=15, defense=2),
+    ]
+
+    for monster_data in monsters_data:
+        session.add(monster_data)
 
 # Commit the changes
 session.commit()

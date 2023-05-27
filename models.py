@@ -262,7 +262,7 @@ def battle(player, quest):
 
 
 def start_game():
-    name = input("Welcome to the Fantasy Game! What is your name? ")
+    name = input("Welcome to Dungeon Quest! What is your name? ")
     char_class = choose_class()
 
     # Check if a player with the same name and class already exists
