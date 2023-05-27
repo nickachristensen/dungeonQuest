@@ -95,8 +95,6 @@ session = Session()
 
 
 # Quest generator function
-selected_quest_names = []
-
 def generate_quest():
     monsters = ["Dragon", "Goblin", "Skeleton", "Troll", "Witch"]
     quest_names = [
@@ -108,13 +106,7 @@ def generate_quest():
     ]
 
     monster = random.choice(monsters)
-    
-    while True:
-        quest_name = random.choice(quest_names)
-        if quest_name not in selected_quest_names:
-            break
-
-    selected_quest_names.append(quest_name)
+    quest_name = random.choice(quest_names)
 
     return monster, quest_name
 
