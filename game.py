@@ -50,7 +50,7 @@ class Item(Base):
     hp_inc = Column(Integer)
     mp_inc = Column(Integer)
     evasion_inc = Column(Integer)
-    players = relationship("Player", secondary="player_item_association")
+    player_id = Column(Integer, ForeignKey("players.id"))
 
     def __init__(
         self, name, attack_inc=0, defense_inc=0, hp_inc=0, mp_inc=0, evasion_inc=0
@@ -77,6 +77,7 @@ class Quest(Base):
     __tablename__ = "quests"
     id = Column(Integer, primary_key=True)
     name = Column(String)
+    monster = Column(String)
     player_id = Column(Integer, ForeignKey("players.id"))
     player = relationship("Player", back_populates="quests")
     items = relationship("Item", secondary="quest_item_association")
