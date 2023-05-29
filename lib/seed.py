@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from models import Base, Item, Monster, Quest
+from models import Base, Item, Monster, Quest, Player
 
 # Create an engine and session
 engine = create_engine('sqlite:///game.db')
@@ -10,6 +10,20 @@ session = Session()
 
 # Create the tables
 Base.metadata.create_all(engine)
+
+# Function to populate the database with initial data
+def seed_database():
+    # Create and insert player records
+    players = [
+        Player(name='Warrior', char_class='Warrior'),
+        Player(name='Mage', char_class='Mage'),
+        Player(name='Rogue', char_class='Rogue')
+    ]
+    session.add_all(players)
+    session.commit()
+
+# Call the seed function
+seed_database()
 
 # Seed the items
 items_data = [
