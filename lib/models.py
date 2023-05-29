@@ -4,6 +4,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
 import random
 
+# Create the database engine and session
 engine = create_engine('sqlite:///game.db')
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -59,9 +60,10 @@ class Player(Base):
 
 
 def generate_quest():
+    # Generate a random quest from the available quests in the database
     try:
-        quests = session.query(Quest).all()  # Get all quests from the database
-        quest = random.choice(quests)  # Randomly select a quest
+        quests = session.query(Quest).all()
+        quest = random.choice(quests)
         monster = quest.monster
         return monster, quest
     except NoResultFound:
@@ -69,6 +71,7 @@ def generate_quest():
 
 
 def choose_class():
+    # Prompt the player to choose a character class
     char_classes = ["Warrior", "Mage", "Rogue"]
 
     while True:
@@ -81,6 +84,7 @@ def choose_class():
 
 
 def choose_quest(player):
+    # Display available quests and prompt the player to choose a quest
     available_quests = session.query(Quest).filter(Quest.player_id == player.id).all()
     print("\nAvailable Quests:")
     for i, quest in enumerate(available_quests, 1):
@@ -206,6 +210,7 @@ def battle(player, quest):
         else:
             print("Invalid action. Please try again.")  # Display an error message for invalid actions
 
+
 def start_game():
     name = input("Welcome to Dungeon Quest! What is your name? ")
     char_class = choose_class()
@@ -250,6 +255,7 @@ def start_game():
 
 
 def level_up(player):
+    # Level up the player and increase their stats
     player.level += 1
     player.max_hp += 10
     player.hp = player.max_hp
