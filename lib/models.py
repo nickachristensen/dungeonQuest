@@ -56,7 +56,9 @@ class Player(Base):
     max_hp = Column(Integer)
     attack = Column(Integer)
     defense = Column(Integer)
-    inventory = relationship("Item")
+    inventory = relationship("Item", backref="player") 
+    inventory_id = Column(Integer, ForeignKey('items.id'))
+
 
 
 def generate_quest():
