@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from lib.models import Base, Item, Monster, Quest
+from models import Base, Item, Monster, Quest
 
 # Create an engine and session
 engine = create_engine('sqlite:///game.db')
