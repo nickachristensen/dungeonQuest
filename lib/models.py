@@ -1,120 +1,72 @@
-from sqlalchemy import create_engine, Column, String, Integer, ForeignKey
-from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.ext.declarative import declarative_base
 import random
 
-# Create the database engine and session
-engine = create_engine('sqlite:///game.db')
-Session = sessionmaker(bind=engine)
-session = Session()
 
-Base = declarative_base()
-
-
-class Item(Base):
-    __tablename__ = "items"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    attack_inc = Column(Integer)
-    defense_inc = Column(Integer)
-    hp_inc = Column(Integer)
-    evasion_inc = Column(Integer)
+class Item:
+    def __init__(self, name, attack_inc=0, defense_inc=0, hp_inc=0, evasion_inc=0):
+        self.name = name
+        self.attack_inc = attack_inc
+        self.defense_inc = defense_inc
+        self.hp_inc = hp_inc
+        self.evasion_inc = evasion_inc
 
 
-class Monster(Base):
-    __tablename__ = "monsters"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    hp = Column(Integer)
-    max_hp = Column(Integer)
-    attack = Column(Integer)
-    defense = Column(Integer)
+class Monster:
+    def __init__(self, name, hp, max_hp, attack, defense):
+        self.name = name
+        self.hp = hp
+        self.max_hp = max_hp
+        self.attack = attack
+        self.defense = defense
 
 
-class Quest(Base):
-    __tablename__ = "quests"
+class Player:
+    def __init__(self, name, char_class, level, experience, gold, hp, max_hp, attack, defense):
+        self.name = name
+        self.char_class = char_class
+        self.level = level
+        self.experience = experience
+        self.gold = gold
+        self.hp = hp
+        self.max_hp = max_hp
+        self.attack = attack
+        self.defense = defense
+        self.inventory = []
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    monster_id = Column(Integer, ForeignKey('monsters.id'))
-    monster = relationship('Monster')
-
-
-class Player(Base):
-    __tablename__ = "players"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    char_class = Column(String)
-    level = Column(Integer)
-    experience = Column(Integer)
-    gold = Column(Integer)
-    hp = Column(Integer)
-    max_hp = Column(Integer)
-    attack = Column(Integer)
-    defense = Column(Integer)
-    inventory = relationship("Item", backref="player") 
-    inventory_id = Column(Integer, ForeignKey('items.id'))
-
+    def level_up(self):
+        self.level += 1
+        self.max_hp += 10
+        self.hp = self.max_hp
+        self.attack += 5
+        self.defense += 3
+        print(f"\n{self.name} leveled up to level {self.level}!")
 
 
 def generate_quest():
-    # Generate a random quest from the available quests in the database
-    try:
-        quests = session.query(Quest).all()
-        quest = random.choice(quests)
-        monster = quest.monster
-        return monster, quest
-    except NoResultFound:
-        print("No quests found in the database.")
+    monsters = ["Dragon", "Goblin", "Skeleton", "Troll", "Witch"]
+    quest_names = [
+        "The Lost Artifact",
+        "The Dark Forest",
+        "Caverns of Despair",
+        "The Forbidden Tower",
+        "The Enchanted Ruins",
+    ]
+
+    monster = random.choice(monsters)
+    quest_name = random.choice(quest_names)
+
+    return monster, quest_name
 
 
-def choose_class():
-    # Prompt the player to choose a character class
-    char_classes = ["Warrior", "Mage", "Rogue"]
-
-    while True:
-        char_class = input(f"Choose a class ({', '.join(char_classes)}): ")
-
-        if char_class.capitalize() in char_classes:
-            return char_class.capitalize()
-
-        print(f"Invalid class. Choose from {', '.join(char_classes)}.")
-
-
-def choose_quest(player):
-    # Display available quests and prompt the player to choose a quest
-    available_quests = session.query(Quest).filter(Quest.player_id == player.id).all()
-    print("\nAvailable Quests:")
-    for i, quest in enumerate(available_quests, 1):
-        print(f"{i}. {quest.name}")
-
-    while True:
-        quest_number = int(input("Choose a quest number: "))
-        if 1 <= quest_number <= len(available_quests):
-            return available_quests[quest_number - 1]
-
-        print(f"Invalid choice. Choose a number between 1 and {len(available_quests)}.")
-
-
-def battle(player, quest):
-    # Simulate a battle between the player and a monster in a quest
-
-    monster = quest.monster
-    print(f"A wild {monster} appears!")  # Display the monster's name
+def battle(player, monster):
+    print(f"A wild {monster} appears!")
 
     monster_stats = {
-        "hp": random.randint(50, 100),  # Randomly generate the monster's HP
-        "max_hp": random.randint(80, 120),  # Randomly generate the monster's maximum HP
-        "attack": random.randint(10, 20),  # Randomly generate the monster's attack power
+        "hp": random.randint(50, 100),
+        "max_hp": random.randint(80, 120),
+        "attack": random.randint(10, 20),
     }
 
     while True:
-        # Print the current HP of the player and the monster, and display available actions
-
         print(f"Your HP: {player.hp}/{player.max_hp}\t{monster} HP: {monster_stats['hp']}/{monster_stats['max_hp']}")
         print("Actions:")
         print("1. Attack")
@@ -122,148 +74,167 @@ def battle(player, quest):
         print("3. Use Item")
         print("4. Run")
 
-        action = input("Choose an action: ")  # Prompt the player to choose an action
+        action = input("Choose an action: ")
 
         if action == "1":
-            # Player attacks the monster
-
-            player_dmg = random.randint(1, player.attack)  # Calculate the player's damage
-            monster_stats["hp"] -= player_dmg  # Reduce the monster's HP
+            player_dmg = random.randint(1, player.attack)
+            monster_stats["hp"] -= player_dmg
             print(f"You attack the {monster} and deal {player_dmg} damage!")
 
             if monster_stats["hp"] <= 0:
-                # Check if the monster is defeated
                 print(f"You defeated the {monster}!")
                 return True
 
-            monster_dmg = random.randint(1, monster_stats["attack"]) - player.defense  # Calculate the monster's damage to the player
+            monster_dmg = random.randint(1, monster_stats["attack"]) - player.defense
 
             if monster_dmg < 0:
                 monster_dmg = 0
-
-            player.hp -= monster_dmg  # Reduce the player's HP based on the monster's damage
+            player.hp -= monster_dmg
             print(f"The {monster} attacks you and deals {monster_dmg} damage!")
 
             if player.hp <= 0:
-                # Check if the player is defeated
                 print("You have been defeated!")
                 return False
 
         elif action == "2":
-            # Player defends against the monster's attack
-
             print(f"The {monster} attacks you but deals no damage!")
-            player.defense //= 2  # Halve the player's defense temporarily
+            player.defense //= 2
 
         elif action == "3":
-            # Player uses an item from their inventory
-
-            if not player.inventory:  # Check if the inventory is empty
+            if not player.inventory:
                 print("Your inventory is empty.")
-                continue  # Send the player back to the previous selection
+                continue
 
             print("\nInventory:")
             for i, item in enumerate(player.inventory, 1):
-                print(f"{i}. {item}")
-
-            item_choice = int(input("Enter the number of the item you want to use: "))  # Prompt the player to choose an item
+                print(f"{i}. {item.name}")
+            item_choice = int(input("Enter the number of the item you want to use: "))
 
             if 1 <= item_choice <= len(player.inventory):
-                # Validate the item choice
-
-                chosen_item = player.inventory[item_choice - 1]  # Retrieve the chosen item from the inventory
+                chosen_item = player.inventory[item_choice - 1]
 
                 if chosen_item.name.lower() == "mana potion" or chosen_item.name.lower() == "health potion":
-                    # Apply health restoration for health and mana potions
                     chosen_item.apply_to_player(player)
                     print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} HP!")
 
                 elif chosen_item.name.lower() not in ["mana potion", "health potion"]:
-                    # Apply item effects for other items
                     chosen_item.apply_to_player(player)
                     print(f"You use a {chosen_item.name} and it has its effects applied!")
             else:
                 print("Invalid item choice.")
 
         elif action == "4":
-            # Attempt to run away from the battle
-
             if random.random() < 0.5:
-                # Random chance of successfully escaping
                 print("You managed to escape!")
                 return False
-
             else:
                 print(f"The {monster} blocks your escape!")
                 monster_dmg = (
                     random.randint(1, monster_stats["attack"]) - player.defense
-                )  # Calculate the monster's damage to the player during escape
+                )
 
                 if monster_dmg < 0:
                     monster_dmg = 0
-
-                player.hp -= monster_dmg  # Reduce the player's HP based on the monster's damage
+                player.hp -= monster_dmg
                 print(f"The {monster} attacks you and deals {monster_dmg} damage!")
 
                 if player.hp <= 0:
-                    # Check if the player is defeated during escape
                     print("You have been defeated!")
                     return False
         else:
-            print("Invalid action. Please try again.")  # Display an error message for invalid actions
+            print("Invalid action. Please try again.")
+
+def level_up(player):
+    # Check if the player has enough experience to level up
+    if player.experience >= 100:
+        player.level += 1
+        player.experience -= 100
+        player.max_hp += 10
+        player.hp = player.max_hp
+        player.attack += 5
+        player.defense += 2
+        print("Level up! You are now level", player.level)
+        print("Max HP increased to", player.max_hp)
+        print("Attack increased to", player.attack)
+        print("Defense increased to", player.defense)
 
 
 def start_game():
     name = input("Welcome to Dungeon Quest! What is your name? ")
-    char_class = choose_class()
+    char_class = input("Choose your class: (Warrior, Mage, Rogue) ")
 
-    try:
-        player = session.query(Player).filter_by(name=name, char_class=char_class).one()
-        print(f"Welcome back, {player.name} the {player.char_class}!")
-    except NoResultFound:
-        player = Player(
-            name=name,
-            char_class=char_class,
-            level=1,
-            experience=0,
-            gold=50,
-            hp=0,
-            max_hp=0,
-            attack=0,
-            defense=0,
+    player = Player(
+        name=name,
+        char_class=char_class,
+        level=1,
+        experience=0,
+        gold=50,
+        hp=0,
+        max_hp=0,
+        attack=0,
+        defense=0,  # Initialize defense to 0
+    )
+
+        # Assign max_hp, hp, and attack based on the chosen class
+    if char_class.lower() == "warrior":
+        player.max_hp = 100
+        player.hp = player.max_hp
+        player.attack = 20
+        player.defense = 10  # Set defense for warrior class
+        player.inventory.extend(
+            [
+                Item(name="Sword of Strength", attack_inc=10),
+                Item(name="Shield of Defense", defense_inc=5),
+                Item(name="Health Potion", hp_inc=20),
+            ]
         )
 
-        session.add(player)
-        session.commit()
+    elif char_class.lower() == "mage":
+        player.max_hp = 80
+        player.hp = player.max_hp
+        player.attack = 30
+        player.defense = 5  # Set defense for mage class
+        player.inventory.extend(
+            [
+                Item(name="Staff of Fire", attack_inc=15),
+                Item(name="Robe of Protection", defense_inc=3),
+                Item(name="Mana Potion", hp_inc=30),
+            ]
+        )
+    elif char_class.lower() == "rogue":
+        player.max_hp = 60
+        player.hp = player.max_hp
+        player.attack = 40
+        player.defense = 3  # Set defense for rogue class
+        player.inventory.extend(
+            [
+                Item(name="Dagger of Agility", attack_inc=12),
+                Item(name="Cloak of Shadows", defense_inc=2),
+                Item(name="Evasion Potion", evasion_inc=10),
+            ]
+        )
+    else:
+        player.max_hp = 100  # Default max_hp value
+        player.hp = player.max_hp
+        player.attack = 10  # Default attack value
+        player.defense = 0  # Default defense value
 
-        print(f"Welcome, {player.name} the {player.char_class}!")
+    print(f"Welcome, {player.name} the {player.char_class}!")
 
     while True:
-        chosen_quest = choose_quest(player)
-        print(f"You selected the quest '{chosen_quest.name}' to battle the {chosen_quest.monster.name}!")
+        monster, quest_name = generate_quest()
+        print(f"You selected the quest '{quest_name}' to battle the {monster}!")
 
-        result = battle(player, chosen_quest)
+        result = battle(player, monster)
 
         if result:
             print("Congratulations, you have completed the quest!")
-            session.delete(chosen_quest)
-            session.commit()
             player.experience += 100
             player.gold += 50
             level_up(player)
         else:
             print("Game Over!")
             break
-
-
-def level_up(player):
-    # Level up the player and increase their stats
-    player.level += 1
-    player.max_hp += 10
-    player.hp = player.max_hp
-    player.attack += 5
-    player.defense += 3
-    print(f"\n{player.name} leveled up to level {player.level}!")
 
 
 start_game()
