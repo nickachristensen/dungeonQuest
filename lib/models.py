@@ -71,7 +71,7 @@ def battle(player, monster):
     monster_stats = {
         "hp": random.randint(50, 100),
         "max_hp": random.randint(80, 120),
-        "attack": random.randint(10, 20),
+        "attack": random.randint(20, 30),
     }
 
     while True:
