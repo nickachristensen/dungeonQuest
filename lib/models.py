@@ -9,6 +9,14 @@ class Item:
         self.hp_inc = hp_inc
         self.evasion_inc = evasion_inc
 
+    def apply_to_player(self, player):
+        # Apply the effects of the item to the player
+        player.attack += self.attack_inc
+        player.defense += self.defense_inc
+        player.hp += self.hp_inc
+        player.evasion += self.evasion_inc
+
+
 class Monster:
     def __init__(self, name, hp, max_hp, attack, defense):
         self.name = name
@@ -19,7 +27,7 @@ class Monster:
 
 
 class Player:
-    def __init__(self, name, char_class, level, experience, gold, hp, max_hp, attack, defense):
+    def __init__(self, name, char_class, level, experience, gold, hp, max_hp, attack, defense, evasion):
         self.name = name
         self.char_class = char_class
         self.level = level
@@ -29,6 +37,7 @@ class Player:
         self.max_hp = max_hp
         self.attack = attack
         self.defense = defense
+        self.evasion = evasion
         self.inventory = []
 
     def level_up(self):
@@ -107,18 +116,27 @@ def battle(player, monster):
             print("\nInventory:")
             for i, item in enumerate(player.inventory, 1):
                 print(f"{i}. {item.name}")
+
             item_choice = int(input("Enter the number of the item you want to use: "))
 
             if 1 <= item_choice <= len(player.inventory):
                 chosen_item = player.inventory[item_choice - 1]
 
-                if chosen_item.name.lower() == "mana potion" or chosen_item.name.lower() == "health potion":
-                    chosen_item.apply_to_player(player)
-                    print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} HP!")
-
+                if chosen_item.name.lower() in ["mana potion", "health potion"]:
+                    if chosen_item.name.lower() == "mana potion":
+                        # Apply mana restoration
+                        player.mana += chosen_item.hp_inc
+                        print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} mana!")
+                    elif chosen_item.name.lower() == "health potion":
+                        # Apply health restoration
+                        player.hp += chosen_item.hp_inc
+                        print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} HP!")
                 elif chosen_item.name.lower() not in ["mana potion", "health potion"]:
                     chosen_item.apply_to_player(player)
                     print(f"You use a {chosen_item.name} and it has its effects applied!")
+                else:
+                    # Handle other items that cannot be used during battle
+                    print("This item cannot be used during battle.")
             else:
                 print("Invalid item choice.")
 
@@ -143,12 +161,6 @@ def battle(player, monster):
         else:
             print("Invalid action. Please try again.")
 
-def apply_to_player(self, player):
-    # Apply the effects of the item to the player
-    player.attack += self.attack_inc
-    player.defense += self.defense_inc
-    player.hp += self.hp_inc
-    player.evasion += self.evasion_inc
 
 def level_up(player):
     # Check if the player has enough experience to level up
@@ -178,10 +190,11 @@ def start_game():
         hp=0,
         max_hp=0,
         attack=0,
-        defense=0,  # Initialize defense to 0
+        defense=0,
+        evasion=0,
     )
 
-        # Assign max_hp, hp, and attack based on the chosen class
+    # Assign max_hp, hp, and attack based on the chosen class
     if char_class.lower() == "warrior":
         player.max_hp = 100
         player.hp = player.max_hp
