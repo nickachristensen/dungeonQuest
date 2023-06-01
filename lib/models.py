@@ -9,7 +9,6 @@ class Item:
         self.hp_inc = hp_inc
         self.evasion_inc = evasion_inc
 
-
 class Monster:
     def __init__(self, name, hp, max_hp, attack, defense):
         self.name = name
@@ -143,6 +142,13 @@ def battle(player, monster):
                     return False
         else:
             print("Invalid action. Please try again.")
+
+def apply_to_player(self, player):
+    # Apply the effects of the item to the player
+    player.attack += self.attack_inc
+    player.defense += self.defense_inc
+    player.hp += self.hp_inc
+    player.evasion += self.evasion_inc
 
 def level_up(player):
     # Check if the player has enough experience to level up
