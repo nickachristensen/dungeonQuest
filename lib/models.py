@@ -27,7 +27,7 @@ class Monster:
 
 
 class Player:
-    def __init__(self, name, char_class, level, experience, gold, hp, max_hp, attack, defense, evasion):
+    def __init__(self, name, char_class, level, experience, gold, hp, max_hp, attack, defense, evasion=0):
         self.name = name
         self.char_class = char_class
         self.level = level
@@ -198,8 +198,7 @@ def start_game():
         hp=0,
         max_hp=0,
         attack=0,
-        defense=0,
-        evasion=0,
+        defense=0,  # Initialize defense to 0
     )
 
     # Assign max_hp, hp, and attack based on the chosen class
@@ -208,49 +207,63 @@ def start_game():
         player.hp = player.max_hp
         player.attack = 20
         player.defense = 10  # Set defense for warrior class
-        player.inventory.extend(
-            [
-                Item(name="Sword of Strength", attack_inc=10),
-                Item(name="Shield of Defense", defense_inc=5),
-                Item(name="Health Potion", hp_inc=20),
-            ]
-        )
+
+        # Refill the inventory with warrior-specific items
+        player.inventory = [
+            Item(name="Sword of Strength", attack_inc=10),
+            Item(name="Shield of Defense", defense_inc=5),
+            Item(name="Health Potion", hp_inc=20),
+        ]
 
     elif char_class.lower() == "mage":
         player.max_hp = 80
         player.hp = player.max_hp
         player.attack = 30
         player.defense = 5  # Set defense for mage class
-        player.inventory.extend(
-            [
-                Item(name="Staff of Fire", attack_inc=15),
-                Item(name="Robe of Protection", defense_inc=3),
-                Item(name="Mana Potion", hp_inc=30),
-            ]
-        )
+
+        # Refill the inventory with mage-specific items
+        player.inventory = [
+            Item(name="Staff of Fire", attack_inc=15),
+            Item(name="Robe of Protection", defense_inc=3),
+            Item(name="Mana Potion", hp_inc=30),
+        ]
+
     elif char_class.lower() == "rogue":
         player.max_hp = 60
         player.hp = player.max_hp
         player.attack = 40
         player.defense = 3  # Set defense for rogue class
-        player.inventory.extend(
-            [
-                Item(name="Dagger of Agility", attack_inc=12),
-                Item(name="Cloak of Shadows", defense_inc=2),
-                Item(name="Evasion Potion", evasion_inc=10),
-            ]
-        )
+
+        # Refill the inventory with rogue-specific items
+        player.inventory = [
+            Item(name="Dagger of Agility", attack_inc=12),
+            Item(name="Cloak of Shadows", defense_inc=2),
+            Item(name="Evasion Potion", evasion_inc=10),
+        ]
+
     else:
         player.max_hp = 100  # Default max_hp value
         player.hp = player.max_hp
         player.attack = 10  # Default attack value
         player.defense = 0  # Default defense value
 
+        # Refill the inventory with default items
+        player.inventory = [
+            Item(name="Basic Sword", attack_inc=5),
+            Item(name="Leather Armor", defense_inc=2),
+        ]
+
     print(f"Welcome, {player.name} the {player.char_class}!")
 
     while True:
         monster, quest_name = generate_quest()
         print(f"You selected the quest '{quest_name}' to battle the {monster}!")
+
+        # Resupply the player's inventory at the start of each new quest
+        player.inventory.extend([
+            Item(name="Health Potion", hp_inc=20),
+            Item(name="Mana Potion", hp_inc=30),
+        ])
 
         result = battle(player, monster)
 
@@ -262,6 +275,5 @@ def start_game():
         else:
             print("Game Over!")
             break
-
 
 start_game()
