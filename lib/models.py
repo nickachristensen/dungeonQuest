@@ -134,7 +134,7 @@ def battle(player, monster):
                 if chosen_item.name.lower() in ["mana potion", "health potion"]:
                     # Apply the effects of health or mana potion
                     if chosen_item.name.lower() == "mana potion":
-                        player.mana += chosen_item.hp_inc
+                        player.hp += chosen_item.hp_inc
                         print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} mana!")
                     elif chosen_item.name.lower() == "health potion":
                         player.hp += chosen_item.hp_inc
