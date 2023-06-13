@@ -1,6 +1,6 @@
 import random
 
-
+# Item class to represent items in the game
 class Item:
     def __init__(self, name, attack_inc=0, defense_inc=0, hp_inc=0, evasion_inc=0):
         self.name = name
@@ -17,6 +17,7 @@ class Item:
         player.evasion += self.evasion_inc
 
 
+# Monster class to represent monsters in the game
 class Monster:
     def __init__(self, name, hp, max_hp, attack, defense):
         self.name = name
@@ -26,6 +27,7 @@ class Monster:
         self.defense = defense
 
 
+# Player class to represent the player character
 class Player:
     def __init__(self, name, char_class, level, experience, gold, hp, max_hp, attack, defense, evasion=0):
         self.name = name
@@ -41,6 +43,7 @@ class Player:
         self.inventory = []
 
     def level_up(self):
+        # Increase player's level and attributes when leveling up
         self.level += 1
         self.max_hp += 10
         self.hp = self.max_hp
@@ -50,6 +53,7 @@ class Player:
 
 
 def generate_quest():
+    # Generate a random monster and quest name for the quest
     monsters = ["Dragon", "Goblin", "Skeleton", "Troll", "Witch"]
     quest_names = [
         "The Lost Artifact",
@@ -68,6 +72,7 @@ def generate_quest():
 def battle(player, monster):
     print(f"A wild {monster} appears!")
 
+    # Initialize the stats for the monster
     monster_stats = {
         "hp": random.randint(50, 100),
         "max_hp": random.randint(80, 120),
@@ -85,6 +90,7 @@ def battle(player, monster):
         action = input("Choose an action: ")
 
         if action == "1":
+            # Player attacks the monster
             player_dmg = random.randint(1, player.attack)
             monster_stats["hp"] -= player_dmg
             print(f"You attack the {monster} and deal {player_dmg} damage!")
@@ -93,6 +99,7 @@ def battle(player, monster):
                 print(f"You defeated the {monster}!")
                 return True
 
+            # Monster attacks the player
             monster_dmg = random.randint(1, monster_stats["attack"]) - player.defense
 
             if monster_dmg < 0:
@@ -105,10 +112,12 @@ def battle(player, monster):
                 return False
 
         elif action == "2":
+            # Player defends against the monster's attack
             print(f"The {monster} attacks you but deals no damage!")
             player.defense //= 2
 
         elif action == "3":
+            # Player uses an item from their inventory
             if not player.inventory:
                 print("Your inventory is empty.")
                 continue
@@ -123,12 +132,11 @@ def battle(player, monster):
                 chosen_item = player.inventory[item_choice - 1]
 
                 if chosen_item.name.lower() in ["mana potion", "health potion"]:
+                    # Apply the effects of health or mana potion
                     if chosen_item.name.lower() == "mana potion":
-                        # Apply mana restoration
                         player.mana += chosen_item.hp_inc
                         print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} mana!")
                     elif chosen_item.name.lower() == "health potion":
-                        # Apply health restoration
                         player.hp += chosen_item.hp_inc
                         print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} HP!")
 
@@ -136,6 +144,7 @@ def battle(player, monster):
                     del player.inventory[item_choice - 1]
 
                 elif chosen_item.name.lower() not in ["mana potion", "health potion"]:
+                    # Apply the effects of the chosen item
                     chosen_item.apply_to_player(player)
                     print(f"You use a {chosen_item.name} and it has its effects applied!")
 
@@ -149,6 +158,7 @@ def battle(player, monster):
                 print("Invalid item choice.")
 
         elif action == "4":
+            # Player tries to escape from the battle
             if random.random() < 0.5:
                 print("You managed to escape!")
                 return False
@@ -186,9 +196,11 @@ def level_up(player):
 
 
 def start_game():
+    # Get player's name and character class
     name = input("Welcome to Dungeon Quest! What is your name? ")
     char_class = input("Choose your class: (Warrior, Mage, Rogue) ")
 
+    # Create a player object based on the chosen class
     player = Player(
         name=name,
         char_class=char_class,
@@ -276,4 +288,5 @@ def start_game():
             print("Game Over!")
             break
 
+# Start the game
 start_game()
