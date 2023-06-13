@@ -131,9 +131,17 @@ def battle(player, monster):
                         # Apply health restoration
                         player.hp += chosen_item.hp_inc
                         print(f"You use a {chosen_item.name} and recover {chosen_item.hp_inc} HP!")
+
+                    # Remove the used item from the player's inventory
+                    del player.inventory[item_choice - 1]
+
                 elif chosen_item.name.lower() not in ["mana potion", "health potion"]:
                     chosen_item.apply_to_player(player)
                     print(f"You use a {chosen_item.name} and it has its effects applied!")
+
+                    # Remove the used item from the player's inventory
+                    del player.inventory[item_choice - 1]
+
                 else:
                     # Handle other items that cannot be used during battle
                     print("This item cannot be used during battle.")
