@@ -40,19 +40,7 @@ then run 'python models.py'to start the game!
 
 5. Follow the on-screen instructions to create your character, choose quests, and battle monsters. :keyboard: :smiley:
 
-## License :page_with_curl:
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Contributing :handshake:
-
-Contributions are welcome! Please read the [CONTRIBUTING](CONTRIBUTING.md) file for guidelines.
-
 ## Acknowledgements :clap:
 
 - This game was inspired by classic text-based adventure games.
 - Thanks to [OpenAI](https://openai.com/) for providing the underlying language model that powers the AI assistance in this project.
-
-## Contact :email:
-
-For any inquiries or feedback, please contact [Nick A. Christensen](mailto:example@example.com).
